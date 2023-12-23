@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ##########
-from MenColth import *
+from Colth import *
+import image
 
 
 
@@ -49,8 +50,8 @@ def callback():
 # Message event						#這邊是用來接收訊息的地方
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    message_type = event.message.type	# events.message.type：這裡記錄訊息的型態
-    user_id = event.source.user_id		# events.sourse.userId：這裡記錄使用者的ID
+	# events.message.type：這裡記錄訊息的型態
+    # events.sourse.userId：這裡記錄使用者的ID
     reply_token = event.reply_token
     
 
@@ -96,17 +97,46 @@ def handle_message(event):
         )
         line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='ConfirmTemplate',template=Temp))
 
-    elif message == "優惠活動":
+    elif message == "男裝":
 
 
-        content, array = MenColth.link()
+        content, array = Colth.Menlink()
         imageutl =""
         columns=[]
 
         
         for i in range(1,5):
             imageutl = array[i]['image']
-            print(imageutl+"哈哈哈哈哈哈")
+            colum= CarouselColumn(
+                thumbnail_image_url=imageutl,
+                title='抗菌.除臭.發熱衣【HEATPUSH】極度升溫內磨毛V領短袖發熱衣-男裝',
+                text='抗菌.除臭.發熱衣【HEATPUSH】極度升溫內磨毛V領短袖發熱衣-男裝',
+                actions=[
+                URIAction(
+                    label='點擊',
+                    uri='https://www.efshop.com.tw/category/457'
+                    )
+                ]
+                )       
+            columns.append(colum)
+            
+        Temp = CarouselTemplate(columns=columns)
+
+        
+
+        line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='Carousel_Template',template=Temp))
+
+
+    elif message == "優惠活動":
+
+
+        content, array = Colth.Salelink()
+        imageutl =""
+        columns=[]
+
+        
+        for i in range(1,5):
+            imageutl = array[i]['image']
             colum= CarouselColumn(
                 thumbnail_image_url=imageutl,
                 title='抗菌.除臭.發熱衣【HEATPUSH】極度升溫內磨毛V領短袖發熱衣-男裝',
@@ -131,7 +161,28 @@ def handle_message(event):
     else:
         line_bot_api.reply_message(reply_token, TextSendMessage(text=message))
     
+
+@handler.add(MessageEvent, message= ImageMessage)
+def handleEvent(event):
+    print(event.message.type)
+
+    reply_token = event.reply_token
+    #line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template',text=translate_text(message)))
+
+
+    image_content = line_bot_api.get_message_content(event.message.id)
+    image_name = event.message.id+'.jpg'
+    path='./LineBot/static/'+image_name
+    with open(path, 'wb') as fd:
+        for chunk in image_content.iter_content():
+            fd.write(chunk)
+
+    base= image.encode_image(path)
+    text= image.image_chat(base)
+
+    line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template', text= text))
     
+  
 
 
 import os							# 這裡是指定我們的BOT執行的位置
