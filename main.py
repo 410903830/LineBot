@@ -4,9 +4,10 @@ load_dotenv()
 
 ##########
 from Colth import *
+from size import *
 import image
-
-
+import json
+import random
 
 
 from flask import Flask, request, abort
@@ -17,16 +18,19 @@ app = Flask(__name__)
 
 
 #環境變數
-
 line_token = os.getenv("token")
 cannel_screte = os.getenv("screte")
-
 
 #LINE BOT infol
 line_bot_api = LineBotApi(line_token) 
  #將Messaging manager中的Channel access token值填入
 handler = WebhookHandler(cannel_screte)
  #basic setting中的Channel Secret值填入
+
+
+#變數
+
+size_mode = 'off'
 
  
 @app.route("/callback", methods=['POST'])		
@@ -53,21 +57,34 @@ def handle_message(event):
 	# events.message.type：這裡記錄訊息的型態
     # events.sourse.userId：這裡記錄使用者的ID
     reply_token = event.reply_token
-    
+    message = event.message.text	
 
-    #性別輸入
+
+    global size_mode
     #身高輸入
+    if message == "身高輸入":
+        size_mode = "height"
+        line_bot_api.reply_message(reply_token, TextSendMessage(text="請輸入身高"))
+    elif(size_mode == "height"):
+        size_mode = "weight"
+        size.height =message
+        line_bot_api.reply_message(reply_token, TextSendMessage(text="請輸入體重"))
+    elif (size_mode == "weight"):
+        content = size.size(size.height, size.weight)
+        line_bot_api.reply_message(reply_token, TextSendMessage(text= content))
+        size_mode = "off"
     #體重輸入
     
     
     #使用者傳送的文字變數
-    message = event.message.text		
+    	
     
     if message == "你好":
         line_bot_api.reply_message(reply_token, TextSendMessage(text="你好啊"))
+    #elif message =="身高輸入":
+
     elif message == "早安":
         line_bot_api.reply_message(reply_token, TextSendMessage(text="早安"))
-    
     elif message == "服務地點":
 
         local = LocationSendMessage(
@@ -77,8 +94,6 @@ def handle_message(event):
             longitude= 120.57744879206233
         )
         line_bot_api.reply_message(reply_token, local)
-
-
     elif message == "1":
 
         Temp = ConfirmTemplate(
@@ -96,7 +111,6 @@ def handle_message(event):
             ]
         )
         line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='ConfirmTemplate',template=Temp))
-
     elif message == "男裝":
 
 
@@ -104,17 +118,21 @@ def handle_message(event):
         imageutl =""
         columns=[]
 
+        cloth_len = Colth.cloth_len
+
+        random_count = random.sample(array, 5)
+
         
-        for i in range(1,5):
-            imageutl = array[i]['image']
+        for count in random_count:
+            imageutl = count['image']
             colum= CarouselColumn(
                 thumbnail_image_url=imageutl,
-                title='抗菌.除臭.發熱衣【HEATPUSH】極度升溫內磨毛V領短袖發熱衣-男裝',
-                text='抗菌.除臭.發熱衣【HEATPUSH】極度升溫內磨毛V領短袖發熱衣-男裝',
+                title=count['title'],
+                text=count['price'],
                 actions=[
                 URIAction(
                     label='點擊',
-                    uri='https://www.efshop.com.tw/category/457'
+                    uri=count['url']
                     )
                 ]
                 )       
@@ -125,26 +143,22 @@ def handle_message(event):
         
 
         line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='Carousel_Template',template=Temp))
-
-
     elif message == "優惠活動":
-
-
         content, array = Colth.Salelink()
         imageutl =""
         columns=[]
+        random_count = random.sample(array, 5)
 
-        
-        for i in range(1,5):
-            imageutl = array[i]['image']
+        for count in random_count:
+            imageutl = count['image']
             colum= CarouselColumn(
                 thumbnail_image_url=imageutl,
-                title='抗菌.除臭.發熱衣【HEATPUSH】極度升溫內磨毛V領短袖發熱衣-男裝',
-                text='抗菌.除臭.發熱衣【HEATPUSH】極度升溫內磨毛V領短袖發熱衣-男裝',
+                title= count['title'],
+                text= count['price'],
                 actions=[
                 URIAction(
                     label='點擊',
-                    uri='https://www.efshop.com.tw/category/457'
+                    uri= count['url']
                     )
                 ]
                 )       
@@ -155,7 +169,43 @@ def handle_message(event):
         
 
         line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='Carousel_Template',template=Temp))
+    elif message == "功能":
+        message_content = {
+        "type": "text", 
+        "text": "請選擇需要的服務",
+        "quickReply": { 
+        "items": [
+        {
+            "type": "action",
+            "imageUrl": "https://example.com/sushi.png",
+            "action": {
+            "type": "message",
+            "label": "尺寸",
+            "text": "身高輸入"
+            }
+        },
+        {
+            "type": "action",
+            "imageUrl": "https://example.com/tempura.png",
+            "action": {
+            "type": "message",
+            "label": "男裝",
+            "text": "男裝"
+            }
+        },
+        {
+            "type": "action", 
+            "action": {
+            "type": "location",
+            "label": "Send location"
+            }
+        }
+        ]
+        }
+    }
+        line_bot_api.reply_message(reply_token, TextSendMessage.new_from_json_dict(message_content))
 
+ 
 
 
     else:

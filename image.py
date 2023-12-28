@@ -31,7 +31,7 @@ def image_chat(base64_image):
       "content": [
         {
           "type": "text",
-          "text": "這剛圖片的穿衣風格"
+          "text": "這張圖片的衣服，請用json格式並翻譯成中文回覆我, rplydata = [{gender:<男裝/女裝>,  style:<衣服類別>, color:<衣服顏色>}]"
         },
         {
           "type": "image_url",
@@ -42,7 +42,7 @@ def image_chat(base64_image):
       ]
     }
   ],
-  "max_tokens": 20
+  "max_tokens": 50
 }
 
   response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
