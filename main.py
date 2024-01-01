@@ -8,6 +8,7 @@ from size import *
 import image
 import json
 import random
+import Regular
 
 
 from flask import Flask, request, abort
@@ -69,11 +70,12 @@ def handle_message(event):
         size_mode = "weight"
         size.height =message
         line_bot_api.reply_message(reply_token, TextSendMessage(text="請輸入體重"))
+    #體重輸入
     elif (size_mode == "weight"):
         content = size.size(size.height, size.weight)
         line_bot_api.reply_message(reply_token, TextSendMessage(text= content))
         size_mode = "off"
-    #體重輸入
+
     
     
     #使用者傳送的文字變數
@@ -230,7 +232,11 @@ def handleEvent(event):
     base= image.encode_image(path)
     text= image.image_chat(base)
 
-    line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template', text= text))
+
+    result = Regular.Re(text)
+    
+
+    line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template', text= result))
     
   
 

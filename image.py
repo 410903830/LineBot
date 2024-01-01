@@ -31,7 +31,7 @@ def image_chat(base64_image):
       "content": [
         {
           "type": "text",
-          "text": "這張圖片的衣服，請用json格式並翻譯成中文回覆我, rplydata = [{gender:<男裝/女裝>,  style:<衣服類別>, color:<衣服顏色>}]"
+          "text": "這張圖片的衣服，請用json格式並翻譯成中文回覆我, rplydata = [{gender:<男裝/女裝>,  style:<衣服類別>, color:<衣服顏色>}] 結束"
         },
         {
           "type": "image_url",
