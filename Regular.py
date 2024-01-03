@@ -31,6 +31,6 @@ def Re(text):
 
     text = f"這是件{gender},風格是{style},顏色是{color}"
 
-    return text
+    return gender, style, color, text
 
 

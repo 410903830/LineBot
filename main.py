@@ -30,9 +30,9 @@ handler = WebhookHandler(cannel_screte)
 
 
 #變數
-
 size_mode = 'off'
-
+gender = ''
+cloth_type = ''
  
 @app.route("/callback", methods=['POST'])		
 #指定在 /callback 通道上接收訊息，且方法是 POST
@@ -59,9 +59,26 @@ def handle_message(event):
     # events.sourse.userId：這裡記錄使用者的ID
     reply_token = event.reply_token
     message = event.message.text	
+    user_id = event.source.user_id
 
 
     global size_mode
+    global gender
+    global cloth_type
+
+
+    ######  抓取 designer json 
+    myjsonfile = open('LineBot/disnger.json', 'r')
+    jsondata = myjsonfile.read()
+    obj= json.loads(jsondata)
+    ######
+
+
+
+    print(gender)
+    print(cloth_type)
+
+
     #身高輸入
     if message == "身高輸入":
         size_mode = "height"
@@ -75,18 +92,54 @@ def handle_message(event):
         content = size.size(size.height, size.weight)
         line_bot_api.reply_message(reply_token, TextSendMessage(text= content))
         size_mode = "off"
+    
+    elif message == "性別":
+        line_bot_api.reply_message(reply_token, FlexSendMessage(alt_text='FlexSendMessage',contents= obj['design'][4]))
+        
+    elif message=="男性" or  message=="女性":
+        gender = message
+        line_bot_api.reply_message(reply_token, FlexSendMessage(alt_text='FlexSendMessage', contents= obj['design'][3]))
 
-    
-    
-    #使用者傳送的文字變數
-    	
-    
-    if message == "你好":
-        line_bot_api.reply_message(reply_token, TextSendMessage(text="你好啊"))
-    #elif message =="身高輸入":
+    elif message=="上衣" or message== "下身" or message== "運動衣褲":
+        cloth_type = message
 
-    elif message == "早安":
-        line_bot_api.reply_message(reply_token, TextSendMessage(text="早安"))
+        if gender== "男性" or gender== "女性":
+
+            content, array= Colth.Search_Cloth(gender, cloth_type)
+
+            imageutl =""
+            columns=[]
+
+            random_count = random.sample(array, 5)
+
+            print(len(array))
+            print(len(random_count))
+
+        
+            for count in random_count:
+                    imageutl = count['image']
+                    colum= CarouselColumn(
+                        thumbnail_image_url=imageutl,
+                        title=count['title'],
+                        text=count['price'],
+                        actions=[
+                        URIAction(
+                            label='點擊',
+                            uri=count['url']
+                            )
+                        ]
+                    )          
+                    columns.append(colum)
+            
+                    Temp = CarouselTemplate(columns=columns)
+
+            line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='Carousel_Template',template=Temp))
+
+        else:
+            print(user_id)
+        line_bot_api.reply_message(reply_token, FlexSendMessage(alt_text='FlexSendMessage',contents=obj['design'][4]))
+
+
     elif message == "服務地點":
 
         local = LocationSendMessage(
@@ -96,23 +149,8 @@ def handle_message(event):
             longitude= 120.57744879206233
         )
         line_bot_api.reply_message(reply_token, local)
-    elif message == "1":
 
-        Temp = ConfirmTemplate(
-            
-            text='你好嗎',
-            actions=[
-                MessageAction(
-                    label='好喔',
-                    text='好喔'
-                ),
-                MessageAction(
-                    label='不太好',
-                    text='不太好'
-                )
-            ]
-        )
-        line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='ConfirmTemplate',template=Temp))
+    #男裝
     elif message == "男裝":
 
 
@@ -145,6 +183,44 @@ def handle_message(event):
         
 
         line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='Carousel_Template',template=Temp))
+    
+        #男裝
+    
+    #女裝
+    elif message == "女裝":
+
+
+        content, array = Colth.Womenlink()
+        imageutl =""
+        columns=[]
+
+        cloth_len = Colth.cloth_len
+
+        random_count = random.sample(array, 5)
+
+        
+        for count in random_count:
+            imageutl = count['image']
+            colum= CarouselColumn(
+                thumbnail_image_url=imageutl,
+                title=count['title'],
+                text=count['price'],
+                actions=[
+                URIAction(
+                    label='點擊',
+                    uri=count['url']
+                    )
+                ]
+                )       
+            columns.append(colum)
+            
+        Temp = CarouselTemplate(columns=columns)
+
+        
+
+        line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='Carousel_Template',template=Temp))
+    
+    #優惠活動
     elif message == "優惠活動":
         content, array = Colth.Salelink()
         imageutl =""
@@ -171,45 +247,64 @@ def handle_message(event):
         
 
         line_bot_api.reply_message(reply_token, TemplateSendMessage(alt_text='Carousel_Template',template=Temp))
+    
+    #圖片辨識
+    elif message == "chatgpt 圖片辨識":
+
+        Temp = ConfirmTemplate(
+            text= '請選擇圖片',
+            actions=[
+                CameraAction(
+                    label='相機',
+                ),
+                CameraRollAction(
+                    label='相簿'
+                )
+            ]
+        )
+
+        line_bot_api.reply_message(reply_token, TemplateSendMessage( alt_text="ConfirmTemplate", template=Temp))
+
+    #功能
     elif message == "功能":
-        message_content = {
-        "type": "text", 
-        "text": "請選擇需要的服務",
-        "quickReply": { 
-        "items": [
-        {
-            "type": "action",
-            "imageUrl": "https://example.com/sushi.png",
-            "action": {
-            "type": "message",
-            "label": "尺寸",
-            "text": "身高輸入"
-            }
-        },
-        {
-            "type": "action",
-            "imageUrl": "https://example.com/tempura.png",
-            "action": {
-            "type": "message",
-            "label": "男裝",
-            "text": "男裝"
-            }
-        },
-        {
-            "type": "action", 
-            "action": {
-            "type": "location",
-            "label": "Send location"
-            }
-        }
-        ]
-        }
-    }
-        line_bot_api.reply_message(reply_token, TextSendMessage.new_from_json_dict(message_content))
 
- 
+        line_bot_api.reply_message(reply_token, TextSendMessage.new_from_json_dict(obj['design'][5]))
 
+    elif message == "test":
 
+        line_bot_api.reply_message(reply_token, FlexSendMessage(alt_text="123",
+        
+        contents= obj['design'][1]
+      
+))
+
+    elif message == "相機":
+        template_message = TemplateSendMessage(
+        alt_text='Camera Template',
+        template=ButtonsTemplate(
+            title='點擊相機拍攝',
+            text=' ',
+            actions=[
+                CameraAction(label='相機')
+            ]
+        )
+    )
+        line_bot_api.reply_message(reply_token, template_message)
+
+    elif message == "相簿":
+        template_message = TemplateSendMessage(
+        alt_text='Camera Template',
+        template=ButtonsTemplate(
+            title='點擊相簿開啟',
+            text=' ',
+            actions=[
+                CameraRollAction(label='相簿')
+            ]
+        )
+    )
+        line_bot_api.reply_message(reply_token, template_message)
+
+    #鸚鵡
     else:
         line_bot_api.reply_message(reply_token, TextSendMessage(text=message))
     
@@ -233,10 +328,13 @@ def handleEvent(event):
     text= image.image_chat(base)
 
 
-    result = Regular.Re(text)
+    gender, style, color, text = Regular.Re(text)
     
 
-    line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template', text= result))
+    line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template', text= text))
+    line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template', text= gender))
+    line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template', text= style))
+    line_bot_api.reply_message(reply_token, TextSendMessage(alt_text='Text_Template', text= color))
     
   
 
