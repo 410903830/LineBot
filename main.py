@@ -90,10 +90,13 @@ def handle_message(event):
     #體重輸入
     elif (size_mode == "weight"):
         content = size.size(size.height, size.weight)
-        line_bot_api.reply_message(reply_token, TextSendMessage(text= content))
+        if content=="S" or content=="M" or content=="M" or content=="L" or content=="XL" or content=="XXL" or content=="3XL":
+            line_bot_api.reply_message(reply_token, TextSendMessage(text= f"你適合的尺寸是:{content}"))
+        else:
+            line_bot_api.reply_message(reply_token, TextSendMessage(text= content))   
         size_mode = "off"
     
-    elif message == "性別":
+    elif message == "挑選衣服":
         line_bot_api.reply_message(reply_token, FlexSendMessage(alt_text='FlexSendMessage',contents= obj['design'][4]))
         
     elif message=="男性" or  message=="女性":
@@ -143,8 +146,8 @@ def handle_message(event):
     elif message == "服務地點":
 
         local = LocationSendMessage(
-            title='快樂Go 衣服',
-            address='台中市沙鹿區快樂Go服飾店',
+            title='快樂Go 衣芙',
+            address='台中市沙鹿區快樂Go芙飾店',
             latitude=24.22670282531597,
             longitude= 120.57744879206233
         )

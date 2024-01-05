@@ -964,10 +964,29 @@
           "imageUrl": "https://example.com/tempura.png",
           "action": {
           "type": "message",
-          "label": "性別",
-          "text": "性別"
+          "label": "挑選衣服",
+          "text": "挑選衣服"
           }
       },
+      
+      {
+        "type": "action", 
+        "action": {
+        "type": "message",
+        "label": "優惠活動",
+        "text": "優惠活動"
+        }
+      },
+
+      {
+        "type": "action", 
+        "action": {
+        "type": "message",
+        "label": "服務地點",
+        "text": "服務地點"
+        }
+      },
+
       {
           "type": "action", 
           "action": {
