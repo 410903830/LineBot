@@ -1,6 +1,6 @@
 import os
-#from dotenv import load_dotenv
-#load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 ##########
 from Colth import *
@@ -19,11 +19,8 @@ app = Flask(__name__)
 
 
 #環境變數
-#line_token = os.getenv("token")
-#cannel_screte = os.getenv("screte")
-
-line_token = "dHsa9nu14mQJ4BQyROTugbIsSlmpWghmFIHOZgDJBbSqKdZPqJl6uM0iOQetyxjJrZOhTBVhMex7uCj00zCEa1pOVeRCBXkOYrgiL7TfYh52XnDO2jkZgUIGQDv8qnadslXk8FQg2Mx73WceRQxnOAdB04t89/1O/w1cDnyilFU="
-cannel_screte = "88d9337002cf903a0edd35e7c5811e05"
+line_token = os.getenv("token")
+cannel_screte = os.getenv("screte")
 
 #LINE BOT infol
 line_bot_api = LineBotApi(line_token) 

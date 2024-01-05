@@ -1,12 +1,11 @@
 import base64
 import requests
 import os
-#from dotenv import load_dotenv
-#load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # OpenAI API Key
-#api_key = os.getenv("api_key")
-api_key="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"
+api_key = os.getenv("api_key")
 # 將圖片解碼成utf-8
 def encode_image(image_path):
   with open(image_path, "rb") as image_file:
